@@ -32,9 +32,10 @@ init( void )
         {  0.90f, -0.85f }, {  0.90f,  0.90f }, { -0.85f,  0.90f }   // Triangle 2
     };
 
-    glCreateBuffers( NumBuffers, Buffers );
+    glGenBuffers( NumBuffers, Buffers );
     glBindBuffer( GL_ARRAY_BUFFER, Buffers[ArrayBuffer] );
-    glBufferStorage( GL_ARRAY_BUFFER, sizeof(vertices), vertices, 0);
+    // glBufferStorage( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     ShaderInfo  shaders[] =
     {
