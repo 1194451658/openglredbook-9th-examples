@@ -24,19 +24,36 @@ const GLuint  NumVertices = 6;
 void
 init( void )
 {
-    glGenVertexArrays( NumVAOs, VAOs );
-    glBindVertexArray( VAOs[Triangles] );
+	// 生成Vertex Array
+	// 函数API上没有Object这个词汇
+    // 而且是，可以生成多个，所以命名上挂s
+    glGenVertexArrays(NumVAOs, VAOs );
+    glBindVertexArray(VAOs[Triangles] );
+    
+    // -----------------------------------------
+    //              传入网格数据
+    // -----------------------------------------
 
-    GLfloat  vertices[NumVertices][2] = {
+	// 顶点数据
+    GLfloat vertices[NumVertices][2] = {
         { -0.90f, -0.90f }, {  0.85f, -0.90f }, { -0.90f,  0.85f },  // Triangle 1
         {  0.90f, -0.85f }, {  0.90f,  0.90f }, { -0.85f,  0.90f }   // Triangle 2
     };
 
-    glGenBuffers( NumBuffers, Buffers );
-    glBindBuffer( GL_ARRAY_BUFFER, Buffers[ArrayBuffer] );
+	// Array Buffer
+    glGenBuffers(NumBuffers, Buffers );
+    glBindBuffer(GL_ARRAY_BUFFER, Buffers[ArrayBuffer]);
+    
+	// glBufferStorage 会崩掉？
+	// 8th书中，没有提到glBufferStorage
     // glBufferStorage( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+	int sizeOfVertices = sizeof(vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // ------------------------
+    //      加载使用的Shader
+    // ----------------------
     ShaderInfo  shaders[] =
     {
         { GL_VERTEX_SHADER, "media/shaders/triangles/triangles.vert" },
@@ -46,9 +63,23 @@ init( void )
 
     GLuint program = LoadShaders( shaders );
     glUseProgram( program );
-
-    glVertexAttribPointer( vPosition, 2, GL_FLOAT,
-                           GL_FALSE, 0, BUFFER_OFFSET(0) );
+    
+    // -------------------------------------------
+    //      指定，Shader中变量，应该如何从Buffer中获取
+    // --------------------------------------------
+    
+    // 测试void*大小
+    int voidStarSize = sizeof(void*);
+    
+    // 指定顶点属性position，应该如何从Array Buffer中去取
+    glVertexAttribPointer(vPosition,
+                          2,                // size: 每个顶点，有几个基本数据元素！这里是2，表示有2个float !
+                          GL_FLOAT,         // type: 每一个数据元素的类型
+                          GL_FALSE,         // normalized: 传入vertex shader的时候，是否需要normalize? 这里传true，会怎样？！
+                          0,                // stride: 到下个顶点数据之间的间隔。这里是0，表示数据紧密的排列着！
+                          BUFFER_OFFSET(0)  // pointer: void*的大小是8，因为是64位操作系统 8*8=64。这里pointer就是表示字节偏移？虽然不知道为什么要用void*类型！
+    );
+    
     glEnableVertexAttribArray( vPosition );
 }
 
